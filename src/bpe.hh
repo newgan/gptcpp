@@ -20,9 +20,7 @@ class TokenPair {
         pair_ = (static_cast<uint64_t>(left) << 32) | right;
     }
 
-    constexpr auto operator<=>(const TokenPair& other) const noexcept {
-        return pair_ <=> other.pair_;
-    }
+    constexpr auto operator<=>(const TokenPair& other) const noexcept { return pair_ <=> other.pair_; }
 
     uint32_t left() const { return pair_ >> 32; }
     uint32_t right() const { return pair_ & 0xFFFF; }

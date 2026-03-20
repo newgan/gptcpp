@@ -29,9 +29,7 @@ CountChunks(const std::vector<std::filesystem::path>& paths,
         file.read(content.data(), size);
         content.resize(static_cast<size_t>(file.gcount()));
 
-        boost::cregex_iterator it(content.data(),
-                                  content.data() + content.size(),
-                                  pattern);
+        boost::cregex_iterator it(content.data(), content.data() + content.size(), pattern);
         boost::cregex_iterator end;
         for (; it != end; ++it) {
             const auto& match = (*it)[0];
@@ -76,8 +74,7 @@ std::vector<Tokenizer::Token> Tokenizer::Encode(const std::string text) {
     while (codepoint_index < text.size()) {
         size_t len = 0;
 
-        unsigned char first_byte =
-            static_cast<unsigned char>(text[codepoint_index]);
+        unsigned char first_byte = static_cast<unsigned char>(text[codepoint_index]);
 
         if ((first_byte & 0x80) == 0x00)
             len = 1;
@@ -90,8 +87,7 @@ std::vector<Tokenizer::Token> Tokenizer::Encode(const std::string text) {
 
         Token token{};
         for (size_t i = 0; i < len; ++i) {
-            token = (token << 8) |
-                    static_cast<unsigned char>(text[codepoint_index + i]);
+            token = (token << 8) | static_cast<unsigned char>(text[codepoint_index + i]);
         }
 
         tokens.push_back(token);

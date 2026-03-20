@@ -21,11 +21,8 @@ std::vector<Delta> MergeWordPair(std::vector<uint32_t>& ids,
             TokenPair pair(ids[i], ids[i + 1]);
 
             if (pair == target_pair) {
-                std::optional<uint32_t> left =
-                    out.empty() ? std::nullopt : std::make_optional(out.back());
-                std::optional<uint32_t> right =
-                    (i + 2 < ids.size()) ? std::make_optional(ids[i + 2])
-                                         : std::nullopt;
+                std::optional<uint32_t> left = out.empty() ? std::nullopt : std::make_optional(out.back());
+                std::optional<uint32_t> right = (i + 2 < ids.size()) ? std::make_optional(ids[i + 2]) : std::nullopt;
 
                 if (left) {
                     deltas.push_back({TokenPair(*left, ids[i]), -1});
@@ -107,8 +104,7 @@ TrainBPE(std::vector<std::vector<uint32_t>>& words,
             auto deltas = MergeWordPair(ids, top.pair, new_id);
 
             for (const auto& delta : deltas) {
-                auto delta_total =
-                    static_cast<int>(delta.delta) * counts[word_idx];
+                auto delta_total = static_cast<int>(delta.delta) * counts[word_idx];
 
                 if (delta_total != 0) {
                     pair_counts[delta.pair] += delta_total;
