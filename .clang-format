@@ -1,0 +1,6 @@
+BasedOnStyle: Google
+IndentWidth: 4
+BinPackParameters: AlwaysOnePerLine
+BinPackArguments: false
+AllowAllArgumentsOnNextLine: false
+ColumnLimit: 80
