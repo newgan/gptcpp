@@ -1,59 +1,47 @@
-#ifndef NANOGPTCPP_BPE_H_
-#define NANOGPTCPP_BPE_H_
-
-#include <absl/container/flat_hash_map.h>
+#ifndef GPTCPP_BPE_H_
+#define GPTCPP_BPE_H_
 
 #include <cassert>
 #include <cstdint>
 #include <vector>
 
-namespace tokenizer {
-class TokenPair {
-   public:
-    TokenPair() = default;
+#include <absl/container/flat_hash_map.h>
+#include <boost/regex/v5/regex_fwd.hpp>
 
-    constexpr TokenPair(uint32_t left,
-                        uint32_t right) {
-        assert(left <= 0xFFFF && "token ID exceeds 32-bit limit");
-        assert(right <= 0xFFFF && "token ID exceeds 32-bit limit");
+#include "tokenizer.hh"
 
-        pair_ = (static_cast<uint64_t>(left) << 32) | right;
-    }
+namespace tokenizer
+{
+    struct MergeJob
+    {
+        TokenPair pair;
+        int64_t count;
 
-    constexpr auto operator<=>(const TokenPair& other) const noexcept { return pair_ <=> other.pair_; }
+        bool operator<(const MergeJob& other) const
+        {
+            auto p1 = count;
+            auto p2 = other.count;
+            if (p1 != p2)
+            {
+                return p1 < p2;
+            }
+            return pair > other.pair;
+        }
+    };
 
-    uint32_t left() const { return pair_ >> 32; }
-    uint32_t right() const { return pair_ & 0xFFFF; }
-    uint64_t value() const { return pair_; }
+    struct Delta
+    {
+        TokenPair pair;
+        int delta;
+    };
 
-   private:
-    uint64_t pair_{};
-};
+    absl::flat_hash_map<std::string, int>
+    SplitAndCountChunks(const std::vector<std::filesystem::path>& paths, const boost::regex& pattern);
+    std::vector<Delta>
+    MergeWordPair(std::vector<uint32_t>& chunk, TokenPair pair_to_merge, uint32_t new_vocab_id);
 
-struct MergeJob {
-    TokenPair pair;
-    uint64_t count;
-    std::vector<size_t> pos;
-    bool operator<(const MergeJob& other) const {
-        if (count != other.count) return count < other.count;
-        return pair > other.pair;
-    }
-};
-
-struct Delta {
-    TokenPair pair;
-    int delta;
-};
-
-std::vector<Delta> MergeWordPair(std::vector<uint32_t>& ids,
-                                 uint32_t target_pair,
-                                 uint32_t new_id);
-
-absl::flat_hash_map<uint32_t,
-                    uint32_t>
-TrainBPE(std::vector<std::vector<uint32_t>>& words,
-         const std::vector<int>& counts,
-         int num_merges);
+    absl::flat_hash_map<TokenPair, uint32_t>
+    TrainBPE(std::vector<std::vector<uint32_t>>& chunks, const std::vector<int>& chunk_counts, int num_merges);
 
 }  // namespace tokenizer
 
